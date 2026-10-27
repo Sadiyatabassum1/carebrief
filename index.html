@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CareBrief – Doctor Visit Prep</title>
+<style>
+  :root{--bg:#f4f8f8;--card:#fff;--ink:#16302f;--muted:#4a6362;--brand:#0f766e;--brand2:#115e59;--warn:#b91c1c;--warnbg:#fef2f2;--line:#b8cfce;--focus:#1d4ed8}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  header{background:linear-gradient(120deg,var(--brand2),var(--brand));color:#fff;padding:28px 20px}
+  header h1{margin:0;font-size:1.7rem}
+  header p{margin:4px 0 0}
+  main{max-width:1050px;margin:0 auto;padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:850px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+  h2{margin-top:0;font-size:1.15rem}
+  label{display:block;font-weight:600;margin:14px 0 4px;font-size:.92rem}
+  fieldset{border:0;margin:14px 0 0;padding:0;min-width:0}
+  legend{font-weight:600;font-size:.92rem;padding:0}
+  .hint{font-size:.82rem;color:var(--muted);margin:2px 0 0}
+  input[type=text],input[type=number],textarea,select{width:100%;padding:9px 11px;border:1px solid #6f8a89;border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+  textarea{min-height:68px;resize:vertical}
+  .row{display:flex;gap:12px}.row>div{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{border:1px solid #6f8a89;border-radius:999px;padding:7px 13px;cursor:pointer;font:inherit;font-size:.88rem;font-weight:400;background:#fff;color:var(--ink);min-height:36px}
+  .chip.on{background:var(--brand);color:#fff;border-color:var(--brand);font-weight:600}
+  .chip.on::before{content:"✓ "}
+  .chip.red{border-color:var(--warn)}
+  .chip.red.on{background:var(--warn);border-color:var(--warn)}
+  input[type=range]{width:100%}
+  button{font:inherit;border:0;border-radius:10px;padding:11px 18px;cursor:pointer;font-weight:600}
+  .primary{background:var(--brand);color:#fff}
+  .ghost{background:#e6f2f1;color:#0b5a53}
+  :focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+  .actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+  .alert{background:var(--warnbg);border:2px solid var(--warn);color:#7f1313;padding:14px 16px;border-radius:10px;margin-bottom:14px}
+  .alert strong{display:block;font-size:1.05rem;color:var(--warn);margin-bottom:4px}
+  .note{background:#eef6f6;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.85rem;color:var(--ink);margin-bottom:6px}
+  .brief h3{margin:16px 0 4px;font-size:.95rem;color:var(--brand);text-transform:uppercase;letter-spacing:.04em}
+  .brief ul{margin:4px 0 0;padding-left:20px}
+  .empty{color:var(--muted)}
+  #out:focus{outline:none}
+  .disclaimer{font-size:.82rem;color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:10px}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;padding:10px 20px 30px}
+  .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  @media print{header,.input-card,.actions,#outActions,footer{display:none!important}main{display:block;padding:0}.card{border:0}}
+</style>
+</head>
+<body>
+<header>
+  <h1>CareBrief</h1>
+  <p>Turn what you feel into a clear one-page summary for your doctor. Runs entirely in your browser — nothing is uploaded.</p>
+</header>
+<main>
+  <section class="card input-card" aria-labelledby="h-form">
+    <h2 id="h-form">1. Tell us about your visit</h2>
+    <div class="note">If you think you may be having an emergency, don’t fill in this form. Call your local emergency number or go to the nearest emergency department.</div>
+    <div class="row">
+      <div><label for="age">Age</label><input id="age" type="number" min="0" max="120" inputmode="numeric"></div>
+      <div><label for="sex">Sex</label>
+        <select id="sex"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Other</option></select></div>
+    </div>
+    <label for="concern">Main concern</label>
+    <input id="concern" type="text" placeholder="e.g. Persistent headaches">
+
+    <fieldset>
+      <legend>Common symptoms</legend>
+      <p class="hint">Select all that apply.</p>
+      <div class="chips" id="symptoms"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Symptoms that can be serious (marked ⚠)</legend>
+      <p class="hint">Selecting any of these will show an urgent-care warning.</p>
+      <div class="chips" id="symptomsRed"></div>
+    </fieldset>
+
+    <div class="row">
+      <div><label for="dur">How long?</label>
+        <select id="dur"><option>Less than 1 day</option><option>1–3 days</option><option selected>4–7 days</option><option>1–4 weeks</option><option>1–6 months</option><option>More than 6 months</option></select></div>
+      <div><label for="sev">Severity: <span id="sevv">5</span>/10</label><input id="sev" type="range" min="1" max="10" value="5" aria-valuetext="5 out of 10"></div>
+    </div>
+    <label for="trig">What makes it better or worse?</label>
+    <textarea id="trig" placeholder="e.g. Worse after meals, better when resting"></textarea>
+    <label for="meds">Current medicines / supplements</label>
+    <textarea id="meds" placeholder="Name and dose if you know it (one per line)"></textarea>
+    <label for="alg">Allergies</label>
+    <input id="alg" type="text" placeholder="e.g. Penicillin">
+    <label for="hist">Relevant medical history</label>
+    <textarea id="hist" placeholder="Past conditions, surgeries, family history"></textarea>
+    <label for="mine">Your own questions</label>
+    <textarea id="mine" placeholder="One per line"></textarea>
+    <div class="actions">
+      <button type="button" class="primary" id="gen">Generate my brief</button>
+      <button type="button" class="ghost" id="reset">Clear form</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="h-brief">
+    <h2 id="h-brief">2. Your brief</h2>
+    <div id="out" class="empty" tabindex="-1" aria-live="polite">Fill in the form and press “Generate my brief”.</div>
+    <div class="actions" id="outActions" style="display:none">
+      <button type="button" class="primary" id="print">Print / Save as PDF</button>
+      <button type="button" class="ghost" id="copy">Copy text</button>
+    </div>
+  </section>
+</main>
+<footer>CareBrief is an organisation tool, not a medical device. It does not diagnose or give treatment advice. Its warning checks are simple rules that have not been clinically validated and can miss serious problems.</footer>
+
+<script>
+const SYMPTOMS = [
+  {n:"Fever"},{n:"Headache"},{n:"Cough"},{n:"Sore throat"},{n:"Fatigue"},{n:"Nausea"},
+  {n:"Vomiting"},{n:"Diarrhoea"},{n:"Abdominal pain"},{n:"Back pain"},{n:"Joint pain"},
+  {n:"Dizziness"},{n:"Skin rash"},{n:"Palpitations"},{n:"Weight change"},{n:"Poor sleep"},
+  {n:"Chest pain",red:1},{n:"Shortness of breath",red:1},{n:"Fainting",red:1},
+  {n:"Sudden weakness or numbness",red:1},{n:"Confusion",red:1},{n:"Vomiting blood",red:1},
+  // Added after safety review (Prompt 2): possible stroke, severe allergic reaction, seizure
+  {n:"Face drooping or slurred speech",red:1},
+  {n:"Swelling of face, lips or throat",red:1},
+  {n:"Seizure or fit",red:1}
+];
+// Plain-language, non-diagnostic questions, each under 20 words (Prompt 3)
+const QUESTIONS = {
+  "Headache":["What tests, if any, do I need for these headaches?","Should I keep a headache diary, and what should it include?"],
+  "Fever":["How long is a fever safe to manage at home?","Which warning signs mean I should come back sooner?"],
+  "Cough":["Is a chest check needed, and when should a cough be investigated further?","Could allergies or something in my surroundings be involved?"],
+  "Sore throat":["Do I need a throat swab or other test?","How long is a sore throat normal, and when should I return?"],
+  "Fatigue":["Would blood tests be useful, such as thyroid, iron or vitamin D?","Could my sleep, diet or medicines be contributing?"],
+  "Nausea":["Could any of my medicines be causing nausea?","Which foods or habits should I avoid for now?"],
+  "Vomiting":["How much fluid should I drink, and what signs of dehydration should I watch for?","When should I come back or seek urgent care?"],
+  "Diarrhoea":["Do I need a stool test or other checks?","What should I eat and drink, and when should I return?"],
+  "Abdominal pain":["Are there foods or habits I should avoid while this is checked?","What symptoms would mean I need urgent care?"],
+  "Back pain":["Which movements or exercises are safe, and which should I avoid?","Is imaging needed, or is physiotherapy a better first step?"],
+  "Joint pain":["How can we tell if this is inflammatory or wear-related?","Would physiotherapy or activity changes help?"],
+  "Dizziness":["Could my blood pressure or medicines be involved?","Is it safe for me to drive or work at heights meanwhile?"],
+  "Skin rash":["Could this be linked to an allergy, infection or skin condition?","Should I avoid any products or foods until it settles?"],
+  "Palpitations":["Do I need an ECG or heart rhythm monitor?","Can caffeine, stress or poor sleep make this worse?"],
+  "Weight change":["Should I have any tests to look into this change?","Could my medicines or diet be playing a part?"],
+  "Poor sleep":["Could a medical cause or my medicines be affecting my sleep?","Which non-medicine approaches do you suggest first?"],
+  // Red-flag symptoms: for the appointment after urgent care has been considered
+  "Chest pain":["Which tests do I need, such as an ECG or blood tests?","Which activities should I avoid until this is checked?"],
+  "Shortness of breath":["Do I need a breathing test or chest scan?","What should I do if my breathing gets worse?"],
+  "Fainting":["Which heart, blood pressure or blood tests do I need?","Is it safe for me to drive or be alone meanwhile?"],
+  "Sudden weakness or numbness":["Which scans or tests do I need, and how soon?","What should I do if it happens again?"],
+  "Confusion":["Which tests might explain the confusion?","Could any of my medicines be involved?"],
+  "Vomiting blood":["Which tests do I need to find the source?","Which foods, drinks or medicines should I avoid for now?"],
+  "Face drooping or slurred speech":["Which scans or tests do I need, and how soon?","What should I do if it happens again?"],
+  "Swelling of face, lips or throat":["Should I be tested for allergies, and which ones?","Should I carry emergency medicine, and how do I use it?"],
+  "Seizure or fit":["Which tests, such as an EEG or brain scan, do I need?","What safety steps should I follow, including driving and bathing?"]
+};
+const GENERIC = [
+  "What do you think is the most likely cause?",
+  "Does how often this happens, or how severe it is, change what you advise?",
+  "Which things make this better or worse, and should I avoid any?",
+  "What tests or follow-up do you recommend, and why?",
+  "What should I do at home, and which warning signs mean I should seek urgent care?",
+  "When should I expect improvement, and when should I book a follow-up?"
+];
+const CONNECTED_Q = "Could my different symptoms be connected to each other?";
+const MED_Q = "Could any of my current medicines or supplements interact with what you prescribe?";
+const MAX_QUESTIONS = 10;
+const DEFAULT_DURATION = "4–7 days";
+const LIMITS = "These warning checks are simple rules. They have not been clinically validated and can miss serious problems, so seek care whenever you feel something is wrong.";
+
+const $ = id => document.getElementById(id);
+const selected = new Set();
+
+SYMPTOMS.forEach(s=>{
+  const el = document.createElement("button");
+  el.type = "button";
+  el.className = "chip" + (s.red?" red":"");
+  el.textContent = (s.red?"⚠ ":"") + s.n;
+  el.setAttribute("aria-pressed","false");
+  el.dataset.name = s.n;
+  el.onclick = ()=>{
+    const on = el.classList.toggle("on");
+    el.setAttribute("aria-pressed", String(on));
+    on ? selected.add(s.n) : selected.delete(s.n);
+  };
+  $(s.red?"symptomsRed":"symptoms").appendChild(el);
+});
+$("sev").oninput = e => {
+  $("sevv").textContent = e.target.value;
+  e.target.setAttribute("aria-valuetext", e.target.value + " out of 10");
+};
+
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const lines = s => s.split(/\n+/).map(x=>x.trim()).filter(Boolean);
+
+// Age must be a whole number from 0 to 120; anything else is left out of the brief
+const isBadAge = v => { if(v==="") return false; const n = Number(v); return !(Number.isInteger(n) && n>=0 && n<=120); };
+const validAge = v => (v!=="" && !isBadAge(v)) ? String(Number(v)) : "";
+
+function build(){
+  const d = {
+    age:validAge($("age").value), ageBad:isBadAge($("age").value), sex:$("sex").value, concern:$("concern").value.trim(),
+    dur:$("dur").value, sev:+$("sev").value, trig:$("trig").value.trim(),
+    meds:lines($("meds").value), alg:$("alg").value.trim(), hist:$("hist").value.trim(),
+    mine:lines($("mine").value), syms:[...selected]
+  };
+  const redFlags = SYMPTOMS.filter(s=>s.red && selected.has(s.n)).map(s=>s.n);
+  const urgentSeverity = d.sev>=9;
+  const symQs = [];
+  d.syms.forEach(s=>{ (QUESTIONS[s]||[]).forEach(q=>symQs.push(q)); });
+  const rest = [
+    ...(d.meds.length?[MED_Q]:[]),
+    ...(d.syms.length>=2?[CONNECTED_Q]:[]),   // only makes sense with 2+ symptoms
+    ...GENERIC
+  ];
+  // symptom-specific first (max 6), then medicine + general questions fill the rest
+  const questions = [...new Set([...new Set(symQs).values()].slice(0,6).concat(rest))].slice(0,MAX_QUESTIONS);
+  return {d, redFlags, urgentSeverity, questions};
+}
+
+function render(b){
+  const {d, redFlags, urgentSeverity, questions} = b;
+  let h = "";
+  if(redFlags.length || urgentSeverity){
+    const reasons = [];
+    if(redFlags.length) reasons.push(`you selected: ${esc(redFlags.join(", "))}`);
+    if(urgentSeverity) reasons.push("you rated severity 9–10 out of 10");
+    h += `<div class="alert" role="alert"><strong>⚠ Get medical help now</strong>`
+      + `Because ${reasons.join(" and ")}, do not wait for a routine appointment. `
+      + `Call your local emergency number (for example 112, 911, 999 or 000) or go to the nearest emergency department. `
+      + `If you are unsure, treat it as urgent.</div>`;
+  }
+  h += `<div class="brief">`;
+  h += `<h3>Patient</h3><div>${d.age?esc(d.age)+" years":"Age not given"}${d.sex?", "+esc(d.sex):""}</div>`;
+  if(d.ageBad) h += `<div class="empty">The age you entered was not a whole number from 0 to 120, so it was left out.</div>`;
+  h += `<h3>Main concern</h3><div>${esc(d.concern||"Not specified")}</div>`;
+  h += `<h3>Symptoms</h3><div>${d.syms.length?esc(d.syms.join(", ")):"None selected"}</div>`;
+  h += `<h3>Timeline &amp; severity</h3><div>Duration: ${esc(d.dur)} · Severity: ${d.sev}/10</div>`;
+  if(d.trig) h += `<h3>Better / worse with</h3><div>${esc(d.trig)}</div>`;
+  h += `<h3>Medicines &amp; supplements</h3>` + (d.meds.length?`<ul>${d.meds.map(m=>`<li>${esc(m)}</li>`).join("")}</ul>`:"<div>None listed</div>");
+  h += `<h3>Allergies</h3><div>${esc(d.alg||"None listed")}</div>`;
+  if(d.hist) h += `<h3>Relevant history</h3><div>${esc(d.hist)}</div>`;
+  h += `<h3>Questions to ask</h3><ul>${[...d.mine,...questions].map(q=>`<li>${esc(q)}</li>`).join("")}</ul>`;
+  h += `</div><div class="disclaimer">Prepared with CareBrief on ${esc(new Date().toLocaleDateString())}. This summary organises information you entered. It is not a diagnosis and does not replace professional medical advice. ${esc(LIMITS)}</div>`;
+  $("out").className = ""; $("out").innerHTML = h;
+  $("outActions").style.display = "flex";
+}
+
+function toText(b){
+  const {d, questions, redFlags, urgentSeverity} = b;
+  const urgent = (redFlags.length||urgentSeverity)
+    ? `URGENT: ${[redFlags.length?"serious symptom(s) selected ("+redFlags.join(", ")+")":"", urgentSeverity?"severity 9–10/10":""].filter(Boolean).join("; ")}. Seek urgent medical care.`
+    : "";
+  return [
+    "CAREBRIEF – VISIT SUMMARY",
+    urgent,
+    `Patient: ${d.age||"?"} yrs ${d.sex||""}`.trim(),
+    `Main concern: ${d.concern||"Not specified"}`,
+    `Symptoms: ${d.syms.join(", ")||"None selected"}`,
+    `Duration: ${d.dur} | Severity: ${d.sev}/10`,
+    d.trig?`Better/worse with: ${d.trig}`:"",
+    `Medicines: ${d.meds.join("; ")||"None listed"}`,
+    `Allergies: ${d.alg||"None listed"}`,
+    d.hist?`History: ${d.hist}`:"",
+    "Questions:", ...[...d.mine,...questions].map((q,i)=>`${i+1}. ${q}`),
+    "Not a diagnosis. Prepared with CareBrief; warning checks are not clinically validated."
+  ].filter(Boolean).join("\n");
+}
+
+let last = null;
+$("gen").onclick = ()=>{
+  last = build(); render(last);
+  $("out").focus();
+  $("out").scrollIntoView({behavior:"smooth", block:"start"});
+};
+$("print").onclick = ()=>window.print();
+$("copy").onclick = async ()=>{
+  if(!last) return;
+  try{ await navigator.clipboard.writeText(toText(last)); $("copy").textContent="Copied ✓"; setTimeout(()=>$("copy").textContent="Copy text",1500); }
+  catch(e){ alert("Copy failed – select the text manually."); }
+};
+$("reset").onclick = ()=>{
+  document.querySelectorAll("input[type=text],input[type=number],textarea").forEach(e=>e.value="");
+  $("sev").value=5; $("sevv").textContent=5; $("sev").setAttribute("aria-valuetext","5 out of 10");
+  $("sex").value="";
+  $("dur").value = DEFAULT_DURATION;   // fix: duration now resets too
+  document.querySelectorAll(".chip.on").forEach(c=>{ c.classList.remove("on"); c.setAttribute("aria-pressed","false"); });
+  selected.clear(); last = null;
+  $("out").className="empty"; $("out").textContent="Fill in the form and press “Generate my brief”.";
+  $("outActions").style.display="none";
+};
+</script>
+</body>
+</html>
